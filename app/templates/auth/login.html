@@ -35,6 +35,9 @@
         </label>
         <button class="btn" style="width:100%">Entrar</button>
       </form>
+      {% if config.REGISTRO_HABILITADO %}
+      <p class="ayuda" style="text-align:center">¿No tienes cuenta? <a href="{{ url_for('auth.registro') }}">Regístrate</a></p>
+      {% endif %}
       <p class="demo">Demo: <strong>admin@soportenet.local</strong> / <strong>admin123</strong></p>
     </div>
   </div>

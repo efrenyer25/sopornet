@@ -12,7 +12,16 @@
           <tr>
             <td>{{ u.nombre }}</td>
             <td>{{ u.email }}</td>
-            <td>{{ u.rol_legible }}</td>
+            <td>
+              {% if u.id != current_user.id %}
+              <form method="post" action="{{ url_for('usuarios.cambiar_rol', usuario_id=u.id) }}">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                <select name="rol" data-autoenvio aria-label="Rol de {{ u.nombre }}" style="width:auto;padding:.3rem .5rem">
+                  {% for clave, nombre in roles.items() %}<option value="{{ clave }}" {{ 'selected' if u.rol == clave }}>{{ nombre }}</option>{% endfor %}
+                </select>
+              </form>
+              {% else %}{{ u.rol_legible }}{% endif %}
+            </td>
             <td><span class="badge {{ 'estado-resuelto' if u.activo else 'estado-cerrado' }}">{{ 'Activo' if u.activo else 'Inactivo' }}</span></td>
             <td>
               {% if u.id != current_user.id %}

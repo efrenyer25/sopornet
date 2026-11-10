@@ -12,7 +12,7 @@ SoporteNet centraliza los reportes de los clientes de un proveedor de fibra ópt
 
 ## ✨ Funcionalidades
 
-- 🔐 Inicio de sesión con roles (administrador, técnico y agente).
+- 🔐 Registro de usuarios e inicio de sesión con roles (administrador, técnico y agente).
 - 🎫 CRUD de tickets con filtros, búsqueda y paginación.
 - ✨ **IA:** clasificación automática (categoría y prioridad) y sugerencia de solución, con análisis en vivo antes de guardar.
 - ⏱️ Control de SLA por prioridad (crítica 4 h, alta 24 h, media 48 h, baja 72 h).
@@ -20,7 +20,7 @@ SoporteNet centraliza los reportes de los clientes de un proveedor de fibra ópt
 - 🏠 Gestión de clientes con validación de cédula o RIF.
 - 📊 Dashboard con indicadores y gráficos.
 - 🔌 API REST JSON.
-- ✅ 43 pruebas automatizadas (85 % de cobertura).
+- ✅ 52 pruebas automatizadas (86 % de cobertura).
 - 🐳 Docker + PostgreSQL y CI con GitHub Actions.
 
 ## 📸 Capturas
@@ -57,6 +57,8 @@ Abre <http://127.0.0.1:5000> e ingresa con uno de estos usuarios:
 | Administrador | admin@soportenet.local | admin123 |
 | Técnico | andrea@soportenet.local | tecnico123 |
 | Agente | laura@soportenet.local | agente123 |
+
+También puedes crear tu propia cuenta desde **«Regístrate»**, en la pantalla de inicio de sesión. Las cuentas nuevas tienen rol de agente, y un administrador puede cambiarlo en **Usuarios**. Para desactivar el registro público, define `REGISTRO_HABILITADO=0`.
 
 ## 🤖 Activar la IA con Claude (opcional)
 

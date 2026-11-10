@@ -38,6 +38,23 @@ def crear():
     return redirect(url_for("usuarios.listar"))
 
 
+@bp.route("/<int:usuario_id>/rol", methods=["POST"])
+@login_required
+@rol_requerido("admin")
+def cambiar_rol(usuario_id: int):
+    usuario = db.session.get(Usuario, usuario_id) or abort(404)
+    rol = request.form.get("rol", "")
+    if rol not in ROLES:
+        flash("Rol inválido.", "danger")
+    elif usuario.id == current_user.id:
+        flash("No puedes cambiar tu propio rol.", "danger")
+    else:
+        usuario.rol = rol
+        db.session.commit()
+        flash(f"{usuario.nombre} ahora es {usuario.rol_legible}.", "success")
+    return redirect(url_for("usuarios.listar"))
+
+
 @bp.route("/<int:usuario_id>/estado", methods=["POST"])
 @login_required
 @rol_requerido("admin")

@@ -11,8 +11,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 def _database_url() -> str:
     url = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'instance' / 'soportenet.db'}")
     # Algunos proveedores (Render, Heroku) entregan "postgres://", SQLAlchemy exige "postgresql://"
-    if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
+    # Además se fija el controlador psycopg2 (SQLAlchemy 2.1 usa "psycopg" v3 por defecto)
+    for prefijo in ("postgres://", "postgresql://"):
+        if url.startswith(prefijo):
+            url = url.replace(prefijo, "postgresql+psycopg2://", 1)
     return url
 
 
@@ -27,6 +29,8 @@ class Config:
     IA_HABILITADA = os.getenv("IA_HABILITADA", "1") == "1"
 
     TICKETS_POR_PAGINA = 15
+    # Permite que nuevas personas creen su cuenta desde /registro (rol: agente)
+    REGISTRO_HABILITADO = os.getenv("REGISTRO_HABILITADO", "1") == "1"
     ZONA_HORARIA = os.getenv("ZONA_HORARIA", "America/Caracas")
 
 

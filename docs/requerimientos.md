@@ -46,7 +46,8 @@ Desarrollar una aplicación web full stack en Python que centralice la gestión 
 | ID | Requerimiento |
 |---|---|
 | RF-01 | El sistema debe permitir iniciar y cerrar sesión con correo y contraseña. |
-| RF-02 | El administrador debe poder crear, activar y desactivar usuarios con un rol. |
+| RF-01b | Una persona nueva debe poder registrarse con nombre, correo y contraseña (mín. 8 caracteres, letras y números). La cuenta se crea con rol de agente y el registro puede desactivarse con `REGISTRO_HABILITADO=0`. |
+| RF-02 | El administrador debe poder crear usuarios, cambiar su rol y activarlos o desactivarlos. |
 | RF-03 | Se debe poder registrar, consultar, editar, buscar y eliminar clientes (con cédula o RIF única y validada). |
 | RF-04 | Se debe poder crear un ticket asociado a un cliente, con título y descripción. |
 | RF-05 | Al crear un ticket, la IA debe sugerir su **categoría**, su **prioridad** y una **propuesta de solución**. |
@@ -193,8 +194,9 @@ flowchart LR
 | Unitarias de modelos | `tests/test_modelos.py` | Hash de contraseñas, código del ticket, SLA, cambio de estado, eliminación en cascada |
 | Integración de API | `tests/test_api.py` | Autenticación, CRUD, validaciones, permisos, filtros y estadísticas |
 | Funcionales web | `tests/test_web.py` | Login, flujo completo de un ticket, CRUD de clientes, roles, CSRF, 404 |
+| Registro | `tests/test_registro.py` | Registro exitoso, validaciones, rol forzado a agente, registro deshabilitado, cambio de rol |
 
-Resultado: **43 pruebas exitosas, 85 % de cobertura.**
+Resultado: **52 pruebas exitosas, 86 % de cobertura.**
 
 ## 12. Relación con los módulos del diplomado
 
