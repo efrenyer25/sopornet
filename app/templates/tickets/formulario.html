@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar ' ~ ticket.codigo if ticket else 'Nuevo ticket' }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>{{ 'Editar ' ~ ticket.codigo if ticket else 'Nuevo ticket' }}</h1>
+    <p>{{ 'Modifica los datos del ticket.' if ticket else 'Describe el problema del cliente. La IA sugerirá categoría, prioridad y solución.' }}</p>
+  </div>
+</div>
+
+<div class="grid grid-detalle">
+  <form class="tarjeta" method="post" id="form-ticket">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+    <div class="campo">
+      <label for="cliente_id">Cliente *</label>
+      <select id="cliente_id" name="cliente_id" required>
+        <option value="">Selecciona un cliente…</option>
+        {% for c in clientes %}
+          <option value="{{ c.id }}" {{ 'selected' if datos.cliente_id|string == c.id|string }}>{{ c.nombre }} · {{ c.documento }}</option>
+        {% endfor %}
+      </select>
+      <span class="ayuda">¿No existe? <a href="{{ url_for('clientes.formulario') }}">Registrar cliente</a></span>
+    </div>
+
+    <div class="campo">
+      <label for="titulo">Título *</label>
+      <input id="titulo" name="titulo" value="{{ datos.titulo or '' }}" required minlength="5" maxlength="150"
+             placeholder="Ej.: Sin internet desde ayer">
+    </div>
+
+    <div class="campo">
+      <label for="descripcion">Descripción *</label>
+      <textarea id="descripcion" name="descripcion" required minlength="10"
+                placeholder="Describe lo que reporta el cliente: síntomas, desde cuándo, luces del equipo…">{{ datos.descripcion or '' }}</textarea>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="categoria">Categoría</label>
+        <select id="categoria" name="categoria">
+          <option value="">Automática (IA)</option>
+          {% for c in categorias %}<option value="{{ c.clave }}" {{ 'selected' if datos.categoria == c.clave }}>{{ c.nombre }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="campo">
+        <label for="prioridad">Prioridad</label>
+        <select id="prioridad" name="prioridad">
+          <option value="">Automática (IA)</option>
+          {% for clave, nombre in PRIORIDADES.items() %}<option value="{{ clave }}" {{ 'selected' if datos.prioridad == clave }}>{{ nombre }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="campo">
+        <label for="asignado_a_id">Asignar a</label>
+        <select id="asignado_a_id" name="asignado_a_id">
+          <option value="">Sin asignar</option>
+          {% for u in tecnicos %}<option value="{{ u.id }}" {{ 'selected' if datos.asignado_a_id|string == u.id|string }}>{{ u.nombre }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="acciones">
+      <button class="btn">{{ 'Guardar cambios' if ticket else 'Crear ticket' }}</button>
+      <button type="button" class="btn btn-ia" id="btn-analizar">✨ Analizar con IA</button>
+      <a class="btn btn-sec" href="{{ url_for('tickets.detalle', ticket_id=ticket.id) if ticket else url_for('tickets.listar') }}">Cancelar</a>
+    </div>
+  </form>
+
+  <aside class="tarjeta panel-ia">
+    <h2>✨ Asistente IA</h2>
+    <p class="ayuda">Pulsa <strong>Analizar con IA</strong> para obtener una clasificación y una propuesta de solución antes de guardar. Puedes aceptarla o ajustarla manualmente.</p>
+    <div id="resultado-ia" aria-live="polite">
+      <p style="margin:0"><strong>Categoría:</strong> <span data-ia="categoria"></span></p>
+      <p style="margin:.2rem 0"><strong>Prioridad:</strong> <span data-ia="prioridad"></span></p>
+      <span class="ayuda">Confianza: <span data-ia="confianza"></span> · Motor: <span data-ia="fuente"></span></span>
+      <div class="confianza"><span data-ia="barra" style="width:0"></span></div>
+      <pre data-ia="sugerencia"></pre>
+      <button type="button" class="btn btn-sm" id="btn-aplicar-ia" style="margin-top:.8rem">Aplicar categoría y prioridad</button>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/ticket-form.js') }}"></script>
+{% endblock %}

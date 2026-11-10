@@ -1,0 +1,14 @@
+[project]
+name = "soportenet"
+version = "1.0.0"
+description = "Mesa de ayuda con Inteligencia Artificial para proveedores de internet (Proyecto final Diplomado Python)"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 130
+target-version = "py311"
+exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]
+ignore = ["B904"]

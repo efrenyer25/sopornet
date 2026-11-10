@@ -1,0 +1,3 @@
+{% macro badge_estado(t) %}<span class="badge estado-{{ t.estado }}">{{ t.estado_legible }}</span>{% endmacro %}
+{% macro badge_prioridad(t) %}<span class="badge prio-{{ t.prioridad }}">{{ t.prioridad_legible }}</span>{% endmacro %}
+{% macro badge_sla(t) %}{% if t.sla_vencido and t.estado in ['abierto', 'en_progreso'] %}<span class="badge sla" title="Superó el tiempo máximo de atención">SLA vencido</span>{% endif %}{% endmacro %}

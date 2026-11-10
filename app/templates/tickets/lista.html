@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, badge_prioridad, badge_sla %}
+{% block titulo %}Tickets{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Tickets</h1>
+    <p>{{ paginacion.total }} resultado(s)</p>
+  </div>
+  <a class="btn" href="{{ url_for('tickets.nuevo') }}">➕ Nuevo ticket</a>
+</div>
+
+<div class="tarjeta">
+  <form class="filtros" method="get" id="form-filtros">
+    <input type="search" name="q" value="{{ filtros.q }}" placeholder="Buscar por título, descripción o cliente…">
+    <select name="estado" data-autoenvio>
+      <option value="">Todos los estados</option>
+      {% for clave, nombre in ESTADOS.items() %}<option value="{{ clave }}" {{ 'selected' if filtros.estado == clave }}>{{ nombre }}</option>{% endfor %}
+    </select>
+    <select name="prioridad" data-autoenvio>
+      <option value="">Todas las prioridades</option>
+      {% for clave, nombre in PRIORIDADES.items() %}<option value="{{ clave }}" {{ 'selected' if filtros.prioridad == clave }}>{{ nombre }}</option>{% endfor %}
+    </select>
+    <select name="categoria" data-autoenvio>
+      <option value="">Todas las categorías</option>
+      {% for c in categorias %}<option value="{{ c.clave }}" {{ 'selected' if filtros.categoria == c.clave }}>{{ c.nombre }}</option>{% endfor %}
+    </select>
+    <select name="asignado" data-autoenvio>
+      <option value="">Cualquier técnico</option>
+      <option value="sin" {{ 'selected' if filtros.asignado == 'sin' }}>Sin asignar</option>
+      {% for u in tecnicos %}<option value="{{ u.id }}" {{ 'selected' if filtros.asignado == u.id|string }}>{{ u.nombre }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-sec">Filtrar</button>
+    {% if filtros.values()|select|list %}<a class="btn btn-sec" href="{{ url_for('tickets.listar') }}">Limpiar</a>{% endif %}
+  </form>
+
+  <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th><th>Título</th><th class="ocultar-movil">Cliente</th><th class="ocultar-movil">Categoría</th>
+          <th>Prioridad</th><th>Estado</th><th class="ocultar-movil">Asignado</th><th class="ocultar-movil">Creado</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for ticket in paginacion.items %}
+        <tr>
+          <td class="codigo"><a href="{{ url_for('tickets.detalle', ticket_id=ticket.id) }}">{{ ticket.codigo }}</a></td>
+          <td><a href="{{ url_for('tickets.detalle', ticket_id=ticket.id) }}">{{ ticket.titulo }}</a> {{ badge_sla(ticket) }}</td>
+          <td class="ocultar-movil">{{ ticket.cliente.nombre }}</td>
+          <td class="ocultar-movil">{{ ticket.categoria.nombre if ticket.categoria else '—' }}</td>
+          <td>{{ badge_prioridad(ticket) }}</td>
+          <td>{{ badge_estado(ticket) }}</td>
+          <td class="ocultar-movil">{{ ticket.asignado_a.nombre if ticket.asignado_a else 'Sin asignar' }}</td>
+          <td class="ocultar-movil">{{ ticket.creado_en|fecha('%d/%m %H:%M') }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="vacio">No se encontraron tickets con esos filtros.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if paginacion.pages > 1 %}
+  <nav class="paginacion" aria-label="Paginación">
+    {% for num in paginacion.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if num %}
+        {% if num == paginacion.page %}<span class="actual">{{ num }}</span>
+        {% else %}<a href="{{ url_for('tickets.listar', pagina=num, **filtros) }}">{{ num }}</a>{% endif %}
+      {% else %}<span>…</span>{% endif %}
+    {% endfor %}
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

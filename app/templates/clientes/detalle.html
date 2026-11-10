@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, badge_prioridad %}
+{% block titulo %}{{ cliente.nombre }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>{{ cliente.nombre }}</h1><p>{{ cliente.documento }} · {{ cliente.plan or 'Sin plan' }}</p></div>
+  <div class="acciones">
+    <a class="btn" href="{{ url_for('tickets.nuevo', cliente_id=cliente.id) }}">➕ Ticket para este cliente</a>
+    <a class="btn btn-sec" href="{{ url_for('clientes.formulario', cliente_id=cliente.id) }}">✏️ Editar</a>
+    {% if current_user.es_admin %}
+    <form method="post" action="{{ url_for('clientes.eliminar', cliente_id=cliente.id) }}" data-confirmar="¿Eliminar a {{ cliente.nombre }} y todos sus tickets?">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="btn btn-peligro">Eliminar</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+<div class="grid grid-detalle">
+  <section class="tarjeta">
+    <h2>Historial de tickets ({{ cliente.tickets|length }})</h2>
+    <div class="tabla-contenedor">
+      <table>
+        <tbody>
+        {% for t in cliente.tickets|sort(attribute='creado_en', reverse=true) %}
+          <tr>
+            <td class="codigo"><a href="{{ url_for('tickets.detalle', ticket_id=t.id) }}">{{ t.codigo }}</a></td>
+            <td>{{ t.titulo }}</td>
+            <td>{{ badge_prioridad(t) }}</td>
+            <td>{{ badge_estado(t) }}</td>
+            <td class="ocultar-movil">{{ t.creado_en|fecha('%d/%m/%Y') }}</td>
+          </tr>
+        {% else %}
+          <tr><td class="vacio">Este cliente no tiene tickets.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="tarjeta">
+    <h2>Contacto</h2>
+    <dl class="meta">
+      <dt>Correo</dt><dd>{{ cliente.email or '—' }}</dd>
+      <dt>Teléfono</dt><dd>{{ cliente.telefono or '—' }}</dd>
+      <dt>Dirección</dt><dd>{{ cliente.direccion or '—' }}</dd>
+      <dt>Registrado</dt><dd>{{ cliente.creado_en|fecha('%d/%m/%Y') }}</dd>
+    </dl>
+  </section>
+</div>
+{% endblock %}

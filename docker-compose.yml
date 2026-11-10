@@ -1,0 +1,31 @@
+# Levanta la aplicación con PostgreSQL:  docker compose up --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: soportenet
+      POSTGRES_USER: soportenet
+      POSTGRES_PASSWORD: soportenet
+    volumes:
+      - datos_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U soportenet"]
+      interval: 5s
+      retries: 10
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://soportenet:soportenet@db:5432/soportenet
+      SECRET_KEY: ${SECRET_KEY:-cambia-esta-clave}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Para probar en http://localhost sin HTTPS
+      SESSION_COOKIE_SECURE: "0"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  datos_pg:

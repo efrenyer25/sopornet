@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, badge_prioridad, badge_sla %}
+{% block titulo %}{{ ticket.codigo }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <p class="codigo">{{ ticket.codigo }} · {{ ticket.categoria.nombre if ticket.categoria else 'Sin categoría' }}</p>
+    <h1>{{ ticket.titulo }}</h1>
+    <div class="acciones">{{ badge_estado(ticket) }} {{ badge_prioridad(ticket) }} {{ badge_sla(ticket) }}</div>
+  </div>
+  <div class="acciones">
+    <a class="btn btn-sec" href="{{ url_for('tickets.editar', ticket_id=ticket.id) }}">✏️ Editar</a>
+    {% if current_user.es_admin %}
+    <form method="post" action="{{ url_for('tickets.eliminar', ticket_id=ticket.id) }}" data-confirmar="¿Eliminar el ticket {{ ticket.codigo }}? Esta acción no se puede deshacer.">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="btn btn-peligro">Eliminar</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid grid-detalle">
+  <div>
+    <section class="tarjeta">
+      <h2>Descripción</h2>
+      <p class="descripcion">{{ ticket.descripcion }}</p>
+    </section>
+
+    <section class="tarjeta panel-ia">
+      <div class="tarjeta-titulo">
+        <h2>✨ Sugerencia de la IA</h2>
+        <form method="post" action="{{ url_for('tickets.reanalizar', ticket_id=ticket.id) }}">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="btn btn-ia btn-sm">Regenerar</button>
+        </form>
+      </div>
+      {% if ticket.ia_sugerencia %}
+        <span class="ayuda">Confianza {{ (ticket.ia_confianza * 100)|round|int }}% · Motor: {{ ticket.ia_fuente }}</span>
+        <div class="confianza"><span style="width: {{ (ticket.ia_confianza * 100)|round|int }}%"></span></div>
+        <pre>{{ ticket.ia_sugerencia }}</pre>
+      {% else %}
+        <p class="ayuda">Este ticket aún no tiene análisis de IA.</p>
+      {% endif %}
+    </section>
+
+    <section class="tarjeta" id="comentarios">
+      <h2>Seguimiento ({{ ticket.comentarios|length }})</h2>
+      {% for c in ticket.comentarios %}
+        <div class="comentario">
+          <div class="comentario-cabecera"><strong>{{ c.usuario.nombre if c.usuario else 'Sistema' }}</strong> · {{ c.creado_en|fecha }}</div>
+          <div class="descripcion">{{ c.contenido }}</div>
+        </div>
+      {% else %}
+        <p class="ayuda">Aún no hay comentarios.</p>
+      {% endfor %}
+      <form method="post" action="{{ url_for('tickets.comentar', ticket_id=ticket.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="campo">
+          <label for="contenido">Agregar comentario</label>
+          <textarea id="contenido" name="contenido" required style="min-height:90px" placeholder="Acciones realizadas, respuesta del cliente…"></textarea>
+        </div>
+        <button class="btn">Comentar</button>
+      </form>
+    </section>
+  </div>
+
+  <aside>
+    <section class="tarjeta">
+      <h2>Gestión</h2>
+      <form method="post" action="{{ url_for('tickets.gestionar', ticket_id=ticket.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="campo">
+          <label for="estado">Estado</label>
+          <select id="estado" name="estado">
+            {% for clave, nombre in ESTADOS.items() %}<option value="{{ clave }}" {{ 'selected' if ticket.estado == clave }}>{{ nombre }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="campo">
+          <label for="g-prioridad">Prioridad</label>
+          <select id="g-prioridad" name="prioridad">
+            {% for clave, nombre in PRIORIDADES.items() %}<option value="{{ clave }}" {{ 'selected' if ticket.prioridad == clave }}>{{ nombre }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="campo">
+          <label for="g-asignado">Técnico asignado</label>
+          <select id="g-asignado" name="asignado_a_id">
+            <option value="">Sin asignar</option>
+            {% for u in tecnicos %}<option value="{{ u.id }}" {{ 'selected' if ticket.asignado_a_id == u.id }}>{{ u.nombre }}</option>{% endfor %}
+          </select>
+        </div>
+        <button class="btn" style="width:100%">Guardar</button>
+      </form>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Datos</h2>
+      <dl class="meta">
+        <dt>Cliente</dt><dd><a href="{{ url_for('clientes.detalle', cliente_id=ticket.cliente.id) }}">{{ ticket.cliente.nombre }}</a></dd>
+        <dt>Documento</dt><dd>{{ ticket.cliente.documento }}</dd>
+        <dt>Teléfono</dt><dd>{{ ticket.cliente.telefono or '—' }}</dd>
+        <dt>Plan</dt><dd>{{ ticket.cliente.plan or '—' }}</dd>
+        <dt>Creado</dt><dd>{{ ticket.creado_en|fecha }}</dd>
+        <dt>Creado por</dt><dd>{{ ticket.creado_por.nombre if ticket.creado_por else '—' }}</dd>
+        <dt>Resuelto</dt><dd>{{ ticket.resuelto_en|fecha }}</dd>
+        <dt>Tiempo</dt><dd>{{ ticket.horas_abierto }} h</dd>
+      </dl>
+    </section>
+  </aside>
+</div>
+{% endblock %}

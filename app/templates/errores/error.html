@@ -1,0 +1,9 @@
+{% extends "base.html" if current_user.is_authenticated else "errores/simple.html" %}
+{% block titulo %}Error {{ codigo }}{% endblock %}
+{% block contenido %}
+<div class="tarjeta" style="max-width:520px;margin:3rem auto;text-align:center">
+  <div style="font-size:3rem;font-weight:800;color:var(--primario)">{{ codigo }}</div>
+  <p>{{ mensaje }}</p>
+  <a class="btn" href="{{ url_for('tickets.dashboard') }}">Volver al inicio</a>
+</div>
+{% endblock %}

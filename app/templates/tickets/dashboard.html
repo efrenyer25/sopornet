@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge_estado, badge_prioridad, badge_sla %}
+{% block titulo %}Dashboard{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Indicadores de atención de los últimos 14 días</p>
+  </div>
+  <a class="btn" href="{{ url_for('tickets.nuevo') }}">➕ Nuevo ticket</a>
+</div>
+
+{% set t = stats.totales %}
+<div class="grid grid-kpi">
+  <div class="tarjeta kpi"><span class="kpi-valor">{{ t.abiertos }}</span><span class="kpi-etiqueta">Tickets abiertos</span></div>
+  <div class="tarjeta kpi peligro"><span class="kpi-valor">{{ t.criticos }}</span><span class="kpi-etiqueta">Críticos abiertos</span></div>
+  <div class="tarjeta kpi aviso"><span class="kpi-valor">{{ t.sla_vencidos }}</span><span class="kpi-etiqueta">Con SLA vencido</span></div>
+  <div class="tarjeta kpi"><span class="kpi-valor">{{ t.sin_asignar }}</span><span class="kpi-etiqueta">Sin asignar</span></div>
+  <div class="tarjeta kpi"><span class="kpi-valor">{{ t.horas_promedio_resolucion }} h</span><span class="kpi-etiqueta">Tiempo prom. de resolución</span></div>
+  <div class="tarjeta kpi exito"><span class="kpi-valor">{{ t.cumplimiento_sla }}%</span><span class="kpi-etiqueta">Cumplimiento de SLA</span></div>
+</div>
+
+<div class="grid grid-2">
+  <div class="tarjeta">
+    <h2>Tickets creados vs. resueltos</h2>
+    <div class="grafico"><canvas id="grafico-tendencia" aria-label="Tendencia diaria"></canvas></div>
+  </div>
+  <div class="tarjeta">
+    <h2>Tickets por categoría (clasificados por IA)</h2>
+    <div class="grafico"><canvas id="grafico-categorias" aria-label="Tickets por categoría"></canvas></div>
+  </div>
+  <div class="tarjeta">
+    <h2>Abiertos por prioridad</h2>
+    <div class="grafico"><canvas id="grafico-prioridad" aria-label="Tickets abiertos por prioridad"></canvas></div>
+  </div>
+  <div class="tarjeta">
+    <div class="tarjeta-titulo">
+      <h2>Últimos tickets abiertos</h2>
+      <a href="{{ url_for('tickets.listar', estado='abierto') }}">Ver todos →</a>
+    </div>
+    <div class="tabla-contenedor">
+      <table>
+        <tbody>
+        {% for ticket in recientes %}
+          <tr>
+            <td class="codigo"><a href="{{ url_for('tickets.detalle', ticket_id=ticket.id) }}">{{ ticket.codigo }}</a></td>
+            <td>{{ ticket.titulo }}<div class="ayuda">{{ ticket.cliente.nombre }}</div></td>
+            <td>{{ badge_prioridad(ticket) }} {{ badge_sla(ticket) }}</td>
+          </tr>
+        {% else %}
+          <tr><td class="vacio">No hay tickets abiertos 🎉</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js 4.4.1 incluido localmente para funcionar sin internet -->
+<script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

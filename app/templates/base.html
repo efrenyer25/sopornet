@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}SoporteNet{% endblock %} · SoporteNet</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="marca"><span class="marca-icono">📡</span> SoporteNet</div>
+    {% set ruta = request.endpoint or '' %}
+    <nav class="nav">
+      <a href="{{ url_for('tickets.dashboard') }}" class="{{ 'activo' if ruta == 'tickets.dashboard' }}">📊 Dashboard</a>
+      <a href="{{ url_for('tickets.listar') }}" class="{{ 'activo' if ruta in ['tickets.listar', 'tickets.detalle', 'tickets.editar'] }}">🎫 Tickets</a>
+      <a href="{{ url_for('tickets.nuevo') }}" class="{{ 'activo' if ruta == 'tickets.nuevo' }}">➕ Nuevo ticket</a>
+      <a href="{{ url_for('tickets.mios') }}">👤 Mis tickets</a>
+      <a href="{{ url_for('clientes.listar') }}" class="{{ 'activo' if ruta.startswith('clientes.') }}">🏠 Clientes</a>
+      {% if current_user.es_admin %}
+        <span class="nav-titulo">Administración</span>
+        <a href="{{ url_for('usuarios.listar') }}" class="{{ 'activo' if ruta.startswith('usuarios.') }}">⚙️ Usuarios</a>
+      {% endif %}
+    </nav>
+    <div class="sidebar-pie">
+      <div class="usuario">{{ current_user.nombre }}</div>
+      <div>{{ current_user.rol_legible }}</div>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn btn-sec btn-sm" style="color:#cfe0f2;border-color:#2b4561">Cerrar sesión</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="contenido">
+    <div class="topbar">
+      <button type="button" id="btn-menu" aria-label="Abrir menú">☰</button>
+      <strong>SoporteNet</strong>
+    </div>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+      {% if mensajes %}
+      <div class="mensajes">
+        {% for categoria, mensaje in mensajes %}
+          <div class="alerta alerta-{{ categoria }}" role="status">
+            <span>{{ mensaje }}</span><button type="button" aria-label="Cerrar" data-cerrar>×</button>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block contenido %}{% endblock %}
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

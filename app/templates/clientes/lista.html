@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Clientes{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div><h1>Clientes</h1><p>{{ clientes|length }} registrado(s)</p></div>
+  <a class="btn" href="{{ url_for('clientes.formulario') }}">➕ Nuevo cliente</a>
+</div>
+<div class="tarjeta">
+  <form class="filtros" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre o documento…">
+    <button class="btn btn-sec">Buscar</button>
+  </form>
+  <div class="tabla-contenedor">
+    <table>
+      <thead><tr><th>Nombre</th><th>Documento</th><th class="ocultar-movil">Teléfono</th><th class="ocultar-movil">Plan</th><th>Tickets</th></tr></thead>
+      <tbody>
+      {% for c in clientes %}
+        <tr>
+          <td><a href="{{ url_for('clientes.detalle', cliente_id=c.id) }}">{{ c.nombre }}</a></td>
+          <td class="codigo">{{ c.documento }}</td>
+          <td class="ocultar-movil">{{ c.telefono or '—' }}</td>
+          <td class="ocultar-movil">{{ c.plan or '—' }}</td>
+          <td>{{ c.tickets|length }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="vacio">No hay clientes.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
